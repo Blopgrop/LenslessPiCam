@@ -16,6 +16,15 @@ LenslessPiCam
       :alt: Downloads
 
 
+.. image:: https://colab.research.google.com/assets/colab-badge.svg
+      :target: https://drive.google.com/drive/folders/1nBDsg86RaZIqQM6qD-612k9v8gDrgdwB?usp=drive_link
+      :alt: notebooks
+
+.. image:: https://huggingface.co/datasets/huggingface/badges/resolve/main/powered-by-huggingface-dark.svg
+      :target: https://huggingface.co/bezzam
+      :alt: huggingface
+
+
 *A Hardware and Software Toolkit for Lensless Computational Imaging with a Raspberry Pi*
 -----------------------------------------------------------------------------------------
 
@@ -146,6 +155,12 @@ directory):
    source lensless_env/bin/activate
    pip install --no-deps -e .
    pip install -r rpi_requirements.txt
+
+   # test on-device camera capture (after setting up the camera)
+   source lensless_env/bin/activate
+   python scripts/measure/on_device_capture.py
+
+You may still need to manually install ``numpy`` and/or ``scipy`` with ``pip`` in case libraries (e.g. ``libopenblas.so.0``) cannot be detected.
    
 
 Acknowledgements

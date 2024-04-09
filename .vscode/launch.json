@@ -1,0 +1,155 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "lensless : Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": "-cn my_config"
+        },
+        {
+            "name": "lensless : Remote Capture PSF",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/scripts/measure/remote_capture.py",
+            "console": "integratedTerminal",
+            "args": "-cn my_config"
+            
+        },
+        {
+            "name": "lensless : Remote Capture",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/scripts/measure/remote_capture.py",
+            "console": "integratedTerminal",
+            "args": "-cn image_capture.yaml"
+            
+        },
+        {
+            
+            "name": "lensless : Analyse",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/scripts/measure/analyze_image.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--fp",
+                "C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/outputs/2024-04-03/CA_coarse_pdf/data/raw_data.png",
+                "--bayer",
+                "--rg",
+                "1.35",
+                "--bg",
+                "1.85",
+                // "--lensless",
+                "--save",
+                "./data/psf/CA_coarse_psf.png"
+            ]
+        },
+        {
+            "name": "lensless : ADMM (CA)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/scripts/recon/admm.py",
+            "args": [
+                "input.psf=C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/data/psf/CA_fine_psf.png",
+                "input.data=C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/outputs/2024-04-03/CA_fine_raw/data/raw_data.png",
+                // "preprocess.bg_pix=null",
+                "admm.n_iter=50",
+                "display.disp=10",
+                // "preprocess.downsample=8",
+                // "preprocess.bayer=True"
+            ]
+        },
+        {
+            "name": "lensless : ADMM (FZA)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/scripts/recon/admm.py",
+            "args": [
+                "input.psf=C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/data/psf/FZA_fine_psf.png",
+                "input.data=C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/outputs/2024-04-04/FZA_fine_real_scene_raw/data/raw_data.png",
+                // "preprocess.bg_pix=null",
+                "admm.n_iter=50",
+                "display.disp=10",
+                // "preprocess.downsample=4",
+                // "preprocess.bayer=True"
+            ]
+        },
+        {
+            "name": "lensless : ADMM (Tape)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/scripts/recon/admm.py",
+            "args": [
+                "input.psf=C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/data/psf/tape_3_psf.png",
+                "input.data=C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/outputs/2024-04-03/tape_test_1_raw/data/raw_data.png",
+                // "preprocess.bg_pix=null",
+                "admm.n_iter=50",
+                "display.disp=10",
+                // "preprocess.downsample=4",
+                // "preprocess.bayer=True"
+            ]
+        },
+        {
+            "name": "lensless : FISTA (FZA)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/scripts/recon/gradient_descent.py",
+            "args": [
+                "input.psf=C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/data/psf/FZA_coarse_psf.png",
+                "input.data=C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/outputs/2024-04-03/FZA_coarse_raw/data/raw_data.png",
+                // "preprocess.bg_pix=null",
+                "gradient_descent.n_iter=300",
+                "display.disp=75",
+                // "preprocess.downsample=8",
+                // "preprocess.bayer=True"
+            ]
+        },
+        {
+            "name": "lensless : FISTA (CA)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/scripts/recon/gradient_descent.py",
+            "args": [
+                "input.psf=C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/data/psf/CA_fine_psf.png",
+                "input.data=C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/outputs/2024-04-03/CA_fine_raw/data/raw_data.png",
+                // "preprocess.bg_pix=null",
+                "gradient_descent.n_iter=300",
+                "display.disp=75",
+                // "preprocess.downsample=8",
+                // "preprocess.bayer=True"
+            ]
+        },
+        {
+            "name": "lensless : FISTA (tape)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/scripts/recon/gradient_descent.py",
+            "args": [
+                "input.psf=C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/data/psf/tape_3_psf.png",
+                "input.data=C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/outputs/2024-04-03/tape_test_1_raw/data/raw_data.png",
+                // "preprocess.bg_pix=null",
+                "gradient_descent.n_iter=300",
+                "display.disp=75",
+                // "preprocess.downsample=8",
+                // "preprocess.bayer=True"
+            ]
+        },
+        {
+            "name": "lensless : remote display",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/scripts/measure/remote_display.py",
+            "args": [
+                "rpi.username=pi3",
+                "rpi.hostname=128.179.151.254",
+                "fp=C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/50.png"
+            ]
+        }
+    ]
+}

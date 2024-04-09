@@ -168,6 +168,9 @@ def analyze_image(fp, gamma, width, bayer, lens, lensless, bg, rg, plot_width, s
     elif lensless:
         # plot autocorrelations and width
         # -- grey
+        img_grey = img_grey.squeeze()
+        img = img.squeeze()
+
         _, ax_auto = plt.subplots(ncols=4, nrows=2, num="Autocorrelations", figsize=(15, 5))
         _, autocorr_grey = plot_autocorr2d(img_grey, ax=ax_auto[0][0])
         plot_cross_section(

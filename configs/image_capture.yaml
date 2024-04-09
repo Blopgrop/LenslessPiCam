@@ -1,0 +1,9 @@
+defaults:
+  - my_config
+  - _self_
+
+capture:
+  # bayer: True
+  rgb: True
+  exp: .1
+  awb_gains: [1.1, 2]

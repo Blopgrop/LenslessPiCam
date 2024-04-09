@@ -325,7 +325,7 @@ def load_psf(
 
     # subtract background, assume black edges
     if bg_pix is None:
-        bg = np.zeros(len(np.shape(psf)))
+        bg = np.zeros(psf.shape[3])
 
     else:
         # grayscale

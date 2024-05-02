@@ -6,13 +6,12 @@
 # Eric BEZZAM [ebezzam@gmail.com]
 # #############################################################################
 
-
+import wandb
 import json
 import math
 import numpy as np
 import matplotlib.pyplot as plt
 import time
-from hydra.utils import get_original_cwd
 import os
 import torch
 from lensless.eval.benchmark import benchmark
@@ -55,7 +54,7 @@ def load_drunet(model_path=None, n_channels=3, requires_grad=False):
 
             # default to yes if no input is given
             valid = input("%s (Y/n) " % msg).lower() != "n"
-            output_path = os.path.join(get_original_cwd(), "models")
+            output_path = os.path.join(this_file_path, "..", "..", "models")
             if valid:
                 url = "https://drive.switch.ch/index.php/s/jTdeMHom025RFRQ/download"
                 filename = "drunet_color.pth"
@@ -303,6 +302,7 @@ class Trainer:
         clip_grad=1.0,
         unrolled_output_factor=False,
         extra_eval_sets=None,
+        use_wandb=False,
         # for adding components during training
         pre_process=None,
         pre_process_delay=None,
@@ -383,6 +383,8 @@ class Trainer:
         """
         global print
 
+        self.use_wandb = use_wandb
+
         self.device = recon._psf.device
         self.logger = logger
         if self.logger is not None:
@@ -430,6 +432,9 @@ class Trainer:
         self.lpips = lpips
         self.skip_NAN = skip_NAN
         self.eval_batch_size = eval_batch_size
+        self.train_multimask = False
+        if hasattr(train_dataset, "multimask"):
+            self.train_multimask = train_dataset.multimask
 
         # check if Subset and if simulating dataset
         self.simulated_dataset_trainable_mask = False
@@ -438,6 +443,7 @@ class Trainer:
             self.simulated_dataset_trainable_mask = True
 
         self.mask = mask
+        self.gamma = gamma
         if mask is not None:
             assert isinstance(mask, TrainableMask)
             self.use_mask = True
@@ -447,11 +453,18 @@ class Trainer:
             # save original PSF
             psf_np = self.mask.get_psf().detach().cpu().numpy()[0, ...]
             psf_np = psf_np.squeeze()  # remove (potential) singleton color channel
-            np.save(os.path.join("psf_original.npy"), psf_np)
-            save_image(psf_np, os.path.join("psf_original.png"))
+            np.save("psf_original.npy", psf_np)
+            fp = "psf_original.png"
+            save_image(psf_np, fp)
+            plot_image(psf_np, gamma=self.gamma)
+            fp_plot = "psf_original_plot.png"
+            plt.savefig(fp_plot)
+
+            if self.use_wandb:
+                wandb.log({"psf": wandb.Image(fp)}, step=0)
+                wandb.log({"psf_plot": wandb.Image(fp_plot)}, step=0)
 
         self.l1_mask = l1_mask
-        self.gamma = gamma
 
         # loss
         if loss == "l2":
@@ -488,6 +501,7 @@ class Trainer:
         self.optimizer_config = optimizer
         self.set_optimizer()
 
+        # metrics
         self.metrics = {
             "LOSS": [],  # train loss
             "LOSS_TEST": [],  # test loss
@@ -599,7 +613,7 @@ class Trainer:
         for batch in pbar:
 
             # get batch
-            if self.train_dataset.multimask:
+            if self.train_multimask:
                 X, y, psfs = batch
                 psfs = psfs.to(self.device)
             else:
@@ -796,10 +810,14 @@ class Trainer:
             output_dir=output_dir,
             crop=self.crop,
             unrolled_output_factor=self.unrolled_output_factor,
+            use_wandb=self.use_wandb,
+            epoch=epoch,
         )
 
         # update metrics with current metrics
         self.metrics["LOSS"].append(mean_loss)
+        if self.use_wandb:
+            wandb.log({"LOSS": mean_loss}, step=epoch)
         for key in current_metrics:
             self.metrics[key].append(current_metrics[key])
 
@@ -822,8 +840,11 @@ class Trainer:
             eval_loss = current_metrics[self.metrics["metric_for_best_model"]]
 
         self.metrics["LOSS_TEST"].append(eval_loss)
+        if self.use_wandb:
+            wandb.log({"LOSS_TEST": eval_loss}, step=epoch)
 
         # add extra evaluation sets
+        extra_metrics_epoch = {}
         if self.extra_eval_sets is not None:
             for eval_set in self.extra_eval_sets:
 
@@ -835,10 +856,11 @@ class Trainer:
                         os.mkdir(output_dir)
                     output_dir = os.path.join(output_dir, str(epoch) + f"_{eval_set}")
 
-                if not self.extra_eval_sets[eval_set].multimask:
-                    # need to set correct PSF for evaluation
-                    # TODO cleaner way to set PSF?
-                    self.recon._set_psf(self.extra_eval_sets[eval_set].psf.to(self.device))
+                if hasattr(self.extra_eval_sets[eval_set], "multimask"):
+                    if not self.extra_eval_sets[eval_set].multimask:
+                        # need to set correct PSF for evaluation
+                        # TODO cleaner way to set PSF?
+                        self.recon._set_psf(self.extra_eval_sets[eval_set].psf.to(self.device))
 
                 # benchmarking
                 extra_metrics = benchmark(
@@ -849,6 +871,9 @@ class Trainer:
                     output_dir=output_dir,
                     crop=self.crop,
                     unrolled_output_factor=self.unrolled_output_factor,
+                    use_wandb=self.use_wandb,
+                    label=eval_set,
+                    epoch=epoch,
                 )
 
                 # add metrics to dictionary
@@ -857,11 +882,18 @@ class Trainer:
                         self.metrics[eval_set][key] = [extra_metrics[key]]
                     else:
                         self.metrics[eval_set][key].append(extra_metrics[key])
+                    extra_metrics_epoch[f"{eval_set}_{key}"] = extra_metrics[key]
 
             # set back PSF to original in case changed
             # TODO: cleaner way?
-            if not self.train_dataset.multimask:
+            if not self.train_multimask:
                 self.recon._set_psf(self.train_dataset.psf.to(self.device))
+
+        # log metrics to wandb
+        if self.use_wandb:
+            wandb.log(current_metrics, step=epoch)
+            if self.extra_eval_sets is not None:
+                wandb.log(extra_metrics_epoch, step=epoch)
 
         return eval_loss
 
@@ -926,7 +958,7 @@ class Trainer:
 
         start_time = time.time()
 
-        self.evaluate(-1, epoch=0, disp=disp)
+        self.evaluate(mean_loss=1, epoch=0, disp=disp)
         for epoch in range(n_epoch):
 
             # add extra components (if specified)
@@ -994,9 +1026,16 @@ class Trainer:
             psf_np = self.mask.get_psf().detach().cpu().numpy()[0, ...]
             psf_np = psf_np.squeeze()  # remove (potential) singleton color channel
             np.save(os.path.join(path, f"psf_epoch{epoch}.npy"), psf_np)
-            save_image(psf_np, os.path.join(path, f"psf_epoch{epoch}.png"))
+            fp = os.path.join(path, f"psf_epoch{epoch}.png")
+            save_image(psf_np, fp)
             plot_image(psf_np, gamma=self.gamma)
-            plt.savefig(os.path.join(path, f"psf_epoch{epoch}_plot.png"))
+            fp_plot = os.path.join(path, f"psf_epoch{epoch}_plot.png")
+            plt.savefig(fp_plot)
+
+            if self.use_wandb and epoch != "BEST":
+                wandb.log({"psf": wandb.Image(fp)}, step=epoch)
+                wandb.log({"psf_plot": wandb.Image(fp_plot)}, step=epoch)
+
             if epoch == "BEST":
                 # save difference with original PSF
                 psf_original = np.load("psf_original.npy")

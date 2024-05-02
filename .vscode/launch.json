@@ -71,12 +71,12 @@
             "request": "launch",
             "program": "C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/scripts/recon/admm.py",
             "args": [
-                "input.psf=C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/data/psf/FZA_fine_psf.png",
-                "input.data=C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/outputs/2024-04-04/FZA_fine_real_scene_raw/data/raw_data.png",
+                "input.psf=C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/data/psf/FZA_coarse_psf.png",
+                "input.data=C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/data/mirflickr_fza_100/82.png",
                 // "preprocess.bg_pix=null",
                 "admm.n_iter=50",
                 "display.disp=10",
-                // "preprocess.downsample=4",
+                "preprocess.downsample=8",
                 // "preprocess.bayer=True"
             ]
         },
@@ -102,7 +102,7 @@
             "program": "C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/scripts/recon/gradient_descent.py",
             "args": [
                 "input.psf=C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/data/psf/FZA_coarse_psf.png",
-                "input.data=C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/outputs/2024-04-03/FZA_coarse_raw/data/raw_data.png",
+                "input.data=C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/data/mirflickr_fza_100/0.png",
                 // "preprocess.bg_pix=null",
                 "gradient_descent.n_iter=300",
                 "display.disp=75",
@@ -148,8 +148,18 @@
             "args": [
                 "rpi.username=pi3",
                 "rpi.hostname=128.179.151.254",
-                "fp=C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/50.png"
+                "fp=C:/Users/dvdk0/Desktop/white_spot.png"
             ]
+        },
+        {
+            "name": "lensless : Upload dataset",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/scripts/data/upload_dataset_huggingface.py",
+            "console": "integratedTerminal",
+            // "args": [
+            //     "-cn upload_mirflickr_fza.yaml"
+            // ]
         }
     ]
 }

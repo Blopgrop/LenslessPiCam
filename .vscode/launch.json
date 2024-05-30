@@ -56,8 +56,8 @@
             "request": "launch",
             "program": "C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/scripts/recon/admm.py",
             "args": [
-                "input.psf=C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/data/psf/CA_fine_psf.png",
-                "input.data=C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/outputs/2024-04-03/CA_fine_raw/data/raw_data.png",
+                "input.psf=C:/Users/dvdk0/Documents/EPFL/MA2/Project_lensless/LenslessPiCam/data/psf/CA_coarse_psf_reversed.png",
+                "input.data=C:/Users/dvdk0/Downloads/mirlickr_CA/ca_10k/1.png",
                 // "preprocess.bg_pix=null",
                 "admm.n_iter=50",
                 "display.disp=10",
